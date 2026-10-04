@@ -1,1 +1,197 @@
 
+///*
+// * Задача: перевод числа из арабских цифр в римские и обратный перевод.
+// * Автор: Сафонова Софья 2к 91г
+ 
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+int romanValue(char c);
+
+void printArabicToRoman(int num, std::ostream& out);
+
+void printRomanToArabic(std::string s, std::ostream& out);
+
+
+void arabicToRomanKeyboard();
+void romanToArabicKeyboard();
+void arabicToRomanFile();
+void romanToArabicFile();
+
+void printMenu();
+void handleChoice(int choice);
+
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    int choice = -1;
+    while (choice != 0) {
+        printMenu();
+        std::cin >> choice;
+
+        handleChoice(choice);
+    }
+
+    return 0;
+}
+
+int romanValue(char c) {
+    if (c == 'I' || c == 'i') return 1;
+    if (c == 'V' || c == 'v') return 5;
+    if (c == 'X' || c == 'x') return 10;
+    if (c == 'L' || c == 'l') return 50;
+    if (c == 'C' || c == 'c') return 100;
+    if (c == 'D' || c == 'd') return 500;
+    if (c == 'M' || c == 'm') return 1000;
+    return 0;
+}
+
+void printArabicToRoman(int num, std::ostream& out) {
+    if (num < 1 || num > 3999) {
+        out << "ошибка";
+        return;
+    }
+
+    int values[13] = { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
+    std::string symbols[13] = { "M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I" };
+
+    for (int i = 0; i < 13; i++) {
+        while (num >= values[i]) {
+            out << symbols[i];
+            num -= values[i];
+        }
+    }
+}
+
+
+void printRomanToArabic(std::string s, std::ostream& out) {
+    if (s.empty()) {
+        out << "ошибка";
+        return;
+    }
+    for (size_t i = 0; i < s.size(); i++) {
+        if (romanValue(s[i]) == 0) {
+            out << "ошибка";
+            return;
+        }
+    }
+
+    int result = 0;
+    for (size_t i = 0; i < s.size(); i++) {
+        int cur = romanValue(s[i]);
+        int next = (i + 1 < s.size()) ? romanValue(s[i + 1]) : 0;
+        if (cur < next) result -= cur;
+        else            result += cur;
+    }
+    out << result;
+}
+
+
+
+void arabicToRomanKeyboard() {
+    int num;
+    std::cout << "Введите арабское число (1..3999): ";
+    std::cin >> num;
+
+    std::cout << "Результат: ";
+    printArabicToRoman(num, std::cout);
+    std::cout << "\n";
+}
+
+void romanToArabicKeyboard() {
+    std::string roman;
+    std::cout << "Введите римское число: ";
+    std::cin >> roman;
+
+    std::cout << "Результат: ";
+    printRomanToArabic(roman, std::cout);
+    std::cout << "\n";
+}
+
+void arabicToRomanFile() {
+    std::string inName, outName;
+    std::cout << "Входной файл (числа построчно): ";
+    std::cin >> inName;
+    std::cout << "Выходной файл: ";
+    std::cin >> outName;
+
+    std::ifstream fin(inName.c_str());
+    if (!fin.is_open()) {
+        std::cout << "Не удалось открыть " << inName << "\n";
+        return;
+    }
+    std::ofstream fout(outName.c_str());
+
+    int num;
+    while (fin >> num) {
+        fout << num << " -> ";
+        printArabicToRoman(num, fout);
+        fout << "\n";
+    }
+
+    fin.close();
+    fout.close();
+    std::cout << "Готово. Смотрите файл " << outName << "\n";
+}
+
+void romanToArabicFile() {
+    std::string inName, outName;
+    std::cout << "Входной файл (записи построчно): ";
+    std::cin >> inName;
+    std::cout << "Выходной файл: ";
+    std::cin >> outName;
+
+    std::ifstream fin(inName.c_str());
+    if (!fin.is_open()) {
+        std::cout << "Не удалось открыть " << inName << "\n";
+        return;
+    }
+    std::ofstream fout(outName.c_str());
+
+    std::string roman;
+    while (fin >> roman) {
+        fout << roman << " -> ";
+        printRomanToArabic(roman, fout);
+        fout << "\n";
+    }
+
+    fin.close();
+    fout.close();
+    std::cout << "Готово. Смотрите файл " << outName << "\n";
+}
+
+
+
+void printMenu() {
+    std::cout << "\n===== МЕНЮ =====\n";
+    std::cout << "1 - Арабское -> Римское (клавиатура)\n";
+    std::cout << "2 - Римское -> Арабское (клавиатура)\n";
+    std::cout << "3 - Арабское -> Римское (файл)\n";
+    std::cout << "4 - Римское -> Арабское (файл)\n";
+    std::cout << "0 - Выход\n";
+    std::cout << "Выбор: ";
+}
+
+void handleChoice(int choice) {
+    if (choice == 1) {
+        arabicToRomanKeyboard();
+    }
+    else if (choice == 2) {
+        romanToArabicKeyboard();
+    }
+    else if (choice == 3) {
+        arabicToRomanFile();
+    }
+    else if (choice == 4) {
+        romanToArabicFile();
+    }
+    else if (choice == 0) {
+        std::cout << "Выход.\n";
+    }
+    else {
+        std::cout << "Нет такого пункта.\n";
+    }
+}
